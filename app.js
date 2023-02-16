@@ -69,8 +69,8 @@ app.get('/login',
 		next();
 	},
 	new LnurlAuth.Middleware({
-		callbackUrl: 'https://lightninglogin.live/login',
-		cancelUrl: 'https://lightninglogin.live/',
+		callbackUrl: 'https://lnauth-demo-1.onrender.com/login',
+		cancelUrl: 'https://lnauth-demo-1.onrender.com/',
 		loginTemplateFilePath: path.join(__dirname, 'views', 'login.html'),
 	})
 );
