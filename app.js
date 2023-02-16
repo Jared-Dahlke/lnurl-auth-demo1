@@ -1,114 +1,122 @@
-const express = require('express');
-const LnurlAuth = require('passport-lnurl-auth');
-const passport = require('passport');
-const session = require('express-session');
+const express = require('express')
+const LnurlAuth = require('passport-lnurl-auth')
+const passport = require('passport')
+const session = require('express-session')
 const favicon = require('serve-favicon')
 const path = require('path')
 
-const app = express();
+const app = express()
 
 const config = {
 	host: process.env.HOST || 'localhost',
 	port: process.env.PORT || 3000,
-	url: null,
-};
-
-if (!config.url) {
-	config.url = 'http://' + config.host + ':' + config.port;
+	url: null
 }
 
-app.set('view engine', 'pug');
+if (!config.url) {
+	config.url = 'http://' + config.host + ':' + config.port
+}
+
+app.set('view engine', 'pug')
+
+app.use(
+	cors({
+		origin: 'http://localhost:3000',
+		credentials: true
+	})
+)
 
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.ico')))
-app.use(session({
-	secret: '12345',
-	resave: false,
-	saveUninitialized: true,
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(
+	session({
+		secret: '12345',
+		resave: false,
+		saveUninitialized: true
+	})
+)
+app.use(passport.initialize())
+app.use(passport.session())
 app.use('/static', express.static(path.join(__dirname, 'public')))
 
 const map = {
-	user: new Map(),
-};
+	user: new Map()
+}
 
-passport.serializeUser(function(user, done) {
-	done(null, user.id);
-});
+passport.serializeUser(function (user, done) {
+	done(null, user.id)
+})
 
-passport.deserializeUser(function(id, done) {
-	done(null, map.user.get(id) || null);
-});
+passport.deserializeUser(function (id, done) {
+	done(null, map.user.get(id) || null)
+})
 
-passport.use(new LnurlAuth.Strategy(function(linkingPublicKey, done) {
-	let user = map.user.get(linkingPublicKey);
-	if (!user) {
-		user = { id: linkingPublicKey };
-		map.user.set(linkingPublicKey, user);
-	}
-	done(null, user);
-}));
+passport.use(
+	new LnurlAuth.Strategy(function (linkingPublicKey, done) {
+		let user = map.user.get(linkingPublicKey)
+		if (!user) {
+			user = { id: linkingPublicKey }
+			map.user.set(linkingPublicKey, user)
+		}
+		done(null, user)
+	})
+)
 
-app.use(passport.authenticate('lnurl-auth'));
+app.use(passport.authenticate('lnurl-auth'))
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
 	if (!req.user) {
 		return res.render('index', { title: 'Login with Lightning!' })
 	}
 	console.log(req.user)
 	res.render('authenticated', { title: 'Logged in', userid: req.user.id })
-});
+})
 
-app.get('/login',
-	function(req, res, next) {
+app.get(
+	'/login',
+	function (req, res, next) {
 		if (req.user) {
 			// Already authenticated.
-			return res.redirect('/');
+			return res.redirect('/')
 		}
-		next();
+		next()
 	},
 	new LnurlAuth.Middleware({
 		callbackUrl: 'https://lnauth-demo-1.onrender.com/login',
 		cancelUrl: 'https://lnauth-demo-1.onrender.com/',
-		loginTemplateFilePath: path.join(__dirname, 'views', 'login.html'),
+		loginTemplateFilePath: path.join(__dirname, 'views', 'login.html')
 	})
-);
+)
 
 app.get('/user', (req, res) => {
 	res.send('here is user: ' + JSON.stringify(req.user))
 })
 
-app.get('/logout',
-	function(req, res, next) {
-		if (req.user) {
-			// Already authenticated.
-			req.session.destroy();
-			return res.redirect('/');
-		}
-		next();
+app.get('/logout', function (req, res, next) {
+	if (req.user) {
+		// Already authenticated.
+		req.session.destroy()
+		return res.redirect('/')
 	}
-);
+	next()
+})
 
-app.get('/learn',
-	function(req, res, next) {
-		res.render('learn')
-	}
-);
+app.get('/learn', function (req, res, next) {
+	res.render('learn')
+})
 
-const server = app.listen(config.port, function() {
-	console.log('Server listening at ' + config.url);
-});
+const server = app.listen(config.port, function () {
+	console.log('Server listening at ' + config.url)
+})
 
-process.on('uncaughtException', error => {
-	console.error(error);
-});
+process.on('uncaughtException', (error) => {
+	console.error(error)
+})
 
-process.on('beforeExit', code => {
+process.on('beforeExit', (code) => {
 	try {
-		server.close();
+		server.close()
 	} catch (error) {
-		console.error(error);
+		console.error(error)
 	}
-	process.exit(code);
-});
+	process.exit(code)
+})
