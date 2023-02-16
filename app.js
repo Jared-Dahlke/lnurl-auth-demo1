@@ -75,6 +75,10 @@ app.get('/login',
 	})
 );
 
+app.get('/user', (req, res) => {
+	res.send(req.user)
+})
+
 app.get('/logout',
 	function(req, res, next) {
 		if (req.user) {
