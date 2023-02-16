@@ -2,6 +2,7 @@ const express = require('express')
 const LnurlAuth = require('passport-lnurl-auth')
 const passport = require('passport')
 const session = require('express-session')
+const cors = require('cors')
 const favicon = require('serve-favicon')
 const path = require('path')
 
