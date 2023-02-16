@@ -76,7 +76,7 @@ app.get('/login',
 );
 
 app.get('/user', (req, res) => {
-	res.send('here is user: ' + req.user)
+	res.send('here is user: ' + JSON.stringify(req.user))
 })
 
 app.get('/logout',
